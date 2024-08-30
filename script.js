@@ -39,14 +39,23 @@ $(document).ready(function() {
     $("#add-location").click(addRandomLocation);
 
     $("#optimize").click(function() {
+        $(".loading").show();
         $.ajax({
-            url: "/optimize",
+            url: "http://localhost:3000/optimize", // Ensure this URL matches your server's URL
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({locations: locations}),
             success: function(response) {
                 drawRoute(response.route);
                 updateStats(response.stats);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error optimizing route:", textStatus, errorThrown);
+                console.error("Response text:", jqXHR.responseText);
+                alert("An error occurred while optimizing the route. Check the console for more details.");
+            },
+            complete: function() {
+                $(".loading").hide();
             }
         });
     });

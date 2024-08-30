@@ -25,7 +25,7 @@ class DeliveryOptimizer:
             keras.layers.Dense(64, activation='relu'),
             keras.layers.Dense(self.action_size, activation='linear')
         ])
-        model.compile(loss='mse', optimizer=keras.optimizers.Adam(lr=self.learning_rate))
+        model.compile(loss='mse', optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate))
         return model
 
     def update_target_model(self):
@@ -35,6 +35,7 @@ class DeliveryOptimizer:
         self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state):
+        state = np.reshape(state, [1, self.state_size])
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
         act_values = self.model.predict(state)
@@ -109,7 +110,7 @@ class DeliveryOptimizer:
             current = route[-1]
             state = self.get_state(locations[current], locations[unvisited[0]])
             action = np.argmax(self.model.predict(state)[0])
-            next_loc = unvisited[action]
+            next_loc = unvisited[action % len(unvisited)]
             
             route.append(next_loc)
             unvisited.remove(next_loc)
