@@ -3,37 +3,51 @@ $(document).ready(function() {
     const height = 600;
 
     let locations = [
-        { id: 0, x: 0, y: 0, type: "depot" }  // Adjust to lat/lng coordinates
+        { id: 0, x: 27.7172, y: 85.3240, type: "depot" }  // Initial depot location set to Kathmandu
     ];
 
     var map;
 
     function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: { lat: 0, lng: 0 },
-            zoom: 4
-        });
+        // Initialize the Leaflet map
+        map = L.map('map').setView([27.7172, 85.3240], 4); // Initial map centered at Kathmandu
+
+        // Use OpenStreetMap tiles for free map data
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
     }
 
     function renderMap() {
-        $('#map').html('');  // Clear the map before rendering
-        var bounds = new google.maps.LatLngBounds();
-        locations.forEach(function(location) {
-            var marker = new google.maps.Marker({
-                position: { lat: location.x, lng: location.y },
-                map: map,
-                title: 'Location: ' + location.x + ',' + location.y
-            });
-            bounds.extend(marker.position);
+        // Clear any previous markers on the map
+        map.eachLayer(function (layer) {
+            if (layer instanceof L.Marker) {
+                map.removeLayer(layer);
+            }
         });
-        map.fitBounds(bounds);
+
+        // Extend the map view to fit all markers
+        var bounds = new L.LatLngBounds();
+
+        // Add new markers for each location
+        locations.forEach(function(location) {
+            var marker = L.marker([location.x, location.y]).addTo(map)
+                .bindPopup('Location: ' + location.x + ',' + location.y);
+            bounds.extend(marker.getLatLng());
+        });
+
+        // Fit the map bounds to the markers
+        if (locations.length > 1) {
+            map.fitBounds(bounds);
+        }
     }
 
     function addRandomLocation() {
+        // Generate a random location (latitude and longitude within valid ranges)
         const newLocation = {
             id: locations.length,
-            x: Math.random() * (180 - (-180)) + (-180), // Latitude range [-180, 180]
-            y: Math.random() * (90 - (-90)) + (-90),   // Longitude range [-90, 90]
+            x: Math.random() * (180 - (-180)) - 180, // Latitude range [-180, 180]
+            y: Math.random() * (90 - (-90)) - 90,    // Longitude range [-90, 90]
             type: "delivery"
         };
         locations.push(newLocation);
@@ -45,7 +59,7 @@ $(document).ready(function() {
     $("#optimize").click(function() {
         $(".loading").show();
         $.ajax({
-            url: "http://localhost:3000/optimize",
+            url: "http://localhost:3000/optimize",  // Placeholder for your backend optimization
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({ locations: locations }),
@@ -71,6 +85,7 @@ $(document).ready(function() {
 
     function drawRoute(route) {
         // Optionally, implement route drawing logic here if needed.
+        // This would involve drawing lines between points using Leaflet's polyline feature.
     }
 
     function updateStats(stats) {
@@ -81,5 +96,6 @@ $(document).ready(function() {
         `);
     }
 
+    // Initialize the map when the document is ready
     initMap();
 });
