@@ -2,38 +2,42 @@ $(document).ready(function() {
     const width = 800;
     const height = 600;
 
-    const svg = d3.select("#map")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
-
     let locations = [
-        {id: 0, x: 100, y: 100, type: "depot"}
+        { id: 0, x: 0, y: 0, type: "depot" }  // Adjust to lat/lng coordinates
     ];
 
-    function updateMap() {
-        const circles = svg.selectAll("circle")
-            .data(locations, d => d.id);
+    var map;
 
-        circles.enter()
-            .append("circle")
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y)
-            .attr("r", 10)
-            .attr("fill", d => d.type === "depot" ? "red" : "blue");
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 0, lng: 0 },
+            zoom: 4
+        });
+    }
 
-        circles.exit().remove();
+    function renderMap() {
+        $('#map').html('');  // Clear the map before rendering
+        var bounds = new google.maps.LatLngBounds();
+        locations.forEach(function(location) {
+            var marker = new google.maps.Marker({
+                position: { lat: location.x, lng: location.y },
+                map: map,
+                title: 'Location: ' + location.x + ',' + location.y
+            });
+            bounds.extend(marker.position);
+        });
+        map.fitBounds(bounds);
     }
 
     function addRandomLocation() {
         const newLocation = {
             id: locations.length,
-            x: Math.random() * (width - 20) + 10,
-            y: Math.random() * (height - 20) + 10,
+            x: Math.random() * (180 - (-180)) + (-180), // Latitude range [-180, 180]
+            y: Math.random() * (90 - (-90)) + (-90),   // Longitude range [-90, 90]
             type: "delivery"
         };
         locations.push(newLocation);
-        updateMap();
+        renderMap();
     }
 
     $("#add-location").click(addRandomLocation);
@@ -41,17 +45,16 @@ $(document).ready(function() {
     $("#optimize").click(function() {
         $(".loading").show();
         $.ajax({
-            url: "http://localhost:3000/optimize", // Ensure this URL matches your server's URL
+            url: "http://localhost:3000/optimize",
             type: "POST",
             contentType: "application/json",
-            data: JSON.stringify({locations: locations}),
+            data: JSON.stringify({ locations: locations }),
             success: function(response) {
                 drawRoute(response.route);
                 updateStats(response.stats);
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error("Error optimizing route:", textStatus, errorThrown);
-                console.error("Response text:", jqXHR.responseText);
                 alert("An error occurred while optimizing the route. Check the console for more details.");
             },
             complete: function() {
@@ -62,26 +65,12 @@ $(document).ready(function() {
 
     $("#reset").click(function() {
         locations = [locations[0]];  // Keep only the depot
-        updateMap();
-        svg.selectAll("line").remove();
+        renderMap();
         $("#stats").empty();
     });
 
     function drawRoute(route) {
-        svg.selectAll("line").remove();
-
-        for (let i = 0; i < route.length - 1; i++) {
-            const start = locations[route[i]];
-            const end = locations[route[i+1]];
-
-            svg.append("line")
-                .attr("x1", start.x)
-                .attr("y1", start.y)
-                .attr("x2", end.x)
-                .attr("y2", end.y)
-                .attr("stroke", "green")
-                .attr("stroke-width", 2);
-        }
+        // Optionally, implement route drawing logic here if needed.
     }
 
     function updateStats(stats) {
@@ -92,5 +81,5 @@ $(document).ready(function() {
         `);
     }
 
-    updateMap();
+    initMap();
 });
