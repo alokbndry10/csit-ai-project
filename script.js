@@ -46,8 +46,8 @@ $(document).ready(function() {
         // Generate a random location (latitude and longitude within valid ranges)
         const newLocation = {
             id: locations.length,
-            x: Math.random() * (180 - (-180)) - 180, // Latitude range [-180, 180]
-            y: Math.random() * (90 - (-90)) - 90,    // Longitude range [-90, 90]
+            x: Math.random() * 180 - 90,  // Latitude range [-90, 90]
+            y: Math.random() * 360 - 180, // Longitude range [-180, 180]
             type: "delivery"
         };
         locations.push(newLocation);
@@ -59,7 +59,7 @@ $(document).ready(function() {
     $("#optimize").click(function() {
         $(".loading").show();
         $.ajax({
-            url: "http://localhost:3000/optimize",  // Placeholder for your backend optimization
+            url: "http://localhost:3000/optimize",  // Ensure this URL is correct
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify({ locations: locations }),
@@ -86,6 +86,10 @@ $(document).ready(function() {
     function drawRoute(route) {
         // Optionally, implement route drawing logic here if needed.
         // This would involve drawing lines between points using Leaflet's polyline feature.
+        if (route && route.length > 1) {
+            const routeCoords = route.map(id => [locations[id].x, locations[id].y]);
+            L.polyline(routeCoords, { color: 'blue' }).addTo(map);
+        }
     }
 
     function updateStats(stats) {

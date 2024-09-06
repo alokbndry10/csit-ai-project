@@ -12,10 +12,16 @@ def index():
 
 @app.route('/optimize', methods=['POST'])
 def optimize():
-    data = request.json
-    locations = data['locations']
-    optimized_route, stats = optimizer.optimize_route(locations)
-    return jsonify({'route': optimized_route, 'stats': stats})
+    try:
+        data = request.json
+        if not data or 'locations' not in data:
+            return jsonify({'error': 'Invalid input data'}), 400
+        
+        locations = data['locations']
+        optimized_route, stats = optimizer.optimize_route(locations)
+        return jsonify({'route': optimized_route, 'stats': stats})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
+    <!-- Mapbox CSS for detailed map data -->
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js'></script>
+
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -39,6 +43,11 @@
     </style>
 </head>
 <body>
+    <noscript>
+        <div class="alert alert-danger" role="alert">
+            This application requires JavaScript to function properly. Please enable JavaScript in your browser settings.
+        </div>
+    </noscript>
     <div class="container">
         <h1 class="mt-5 mb-4 text-center">Delivery Route Optimization</h1>
         <div id="map"></div>
